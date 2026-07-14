@@ -7,25 +7,31 @@ def transfer_funds(from_account, to_account, amount):
     Returns a transaction dict on success.
     Raises ValueError for invalid inputs.
     """
+    minimum_transfer_amount = 0
+
     if not isinstance(amount, (int, float)) or isinstance(amount, bool):
         raise ValueError("Transfer amount must be a numeric value")
 
-    if amount <= 0:
+    if amount <= minimum_transfer_amount:
         raise ValueError("Transfer amount must be greater than zero")
 
-    if from_account is to_account:
+    is_same_account = from_account is to_account
+    if is_same_account:
         raise ValueError("Source and destination accounts must be different")
 
-    if from_account.get("balance", 0) < amount:
+    source_balance = from_account.get("balance", minimum_transfer_amount)
+    if source_balance < amount:
         raise ValueError("Source account must have sufficient funds")
 
     from_account["balance"] -= amount
     to_account["balance"] += amount
 
-    return {
+    transaction = {
         "from_id": from_account["id"],
         "to_id": to_account["id"],
         "amount": amount,
         "from_balance_after": from_account["balance"],
         "to_balance_after": to_account["balance"],
     }
+
+    return transaction
